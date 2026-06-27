@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  serverExternalPackages: ["pg-cloudflare", "puppeteer-core", "puppeteer"],
 };
 
 export default nextConfig;
