@@ -34,8 +34,17 @@ export async function GET(
   }
 
   try {
-    // Dynamically import puppeteer so Next.js doesn't bundle it at build time
-    const puppeteer = (await import("puppeteer")).default;
+    // Dynamically import puppeteer — only available in Node.js environments (not Cloudflare Workers)
+    let puppeteer;
+    try {
+      // @ts-ignore — puppeteer is an optional dependency, only available in Node.js environments
+      puppeteer = (await import("puppeteer")).default;
+    } catch {
+      return NextResponse.json(
+        { error: "PDF generation requires a Node.js server environment with Chromium. Not available on edge/worker runtimes." },
+        { status: 501 }
+      );
+    }
 
     // Determine the base URL from the request
     const origin = `${req.nextUrl.protocol}//${req.nextUrl.host}`;

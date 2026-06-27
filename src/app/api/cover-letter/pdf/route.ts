@@ -158,8 +158,17 @@ export async function POST(req: NextRequest) {
 </html>
     `;
 
-    // Launch Puppeteer to render cover letter PDF
-    const puppeteer = (await import("puppeteer")).default;
+    // Launch Puppeteer to render cover letter PDF — only available in Node.js environments
+    let puppeteer;
+    try {
+      // @ts-ignore — puppeteer is an optional dependency, only available in Node.js environments
+      puppeteer = (await import("puppeteer")).default;
+    } catch {
+      return NextResponse.json(
+        { error: "PDF generation requires a Node.js server environment with Chromium. Not available on edge/worker runtimes." },
+        { status: 501 }
+      );
+    }
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
