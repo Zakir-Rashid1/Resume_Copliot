@@ -1,0 +1,367 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Zety-Inspired Color Theme (Light as default) */
+  --background: #f4f6f8; /* Soft light grey canvas */
+  --foreground: #1e293b; /* Slate 800 for high-contrast body text */
+  
+  --card: #ffffff; /* Clean white card panels */
+  --card-foreground: #1e293b;
+  
+  --primary: #0284c7; /* Professional Blue (Zety Sky Blue Accent) */
+  --primary-foreground: #ffffff;
+  
+  --secondary: #0f172a; /* Slate 900 for dark accents */
+  --secondary-foreground: #ffffff;
+  
+  --muted: #f1f5f9; /* Slate 100 */
+  --muted-foreground: #64748b; /* Slate 500 */
+  
+  --accent: #38bdf8; /* Sky 400 */
+  --accent-foreground: #0f172a;
+  
+  --destructive: #ef4444; /* High-attention red for warnings */
+  --destructive-foreground: #ffffff;
+  
+  --success: #10b981; /* Emerald green for passing sections */
+  --success-foreground: #ffffff;
+  
+  --border: #e2e8f0; /* Slate 200 borders */
+  --input: #ffffff;
+  --ring: #0284c7;
+
+  --radius: 0.5rem;
+  
+  /* Paper and indicator shadows */
+  --paper-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode override */
+.dark {
+  --background: #0f172a; /* Slate 900 */
+  --foreground: #f8fafc; /* Slate 50 */
+  
+  --card: #1e293b; /* Slate 800 */
+  --card-foreground: #f8fafc;
+  
+  --primary: #38bdf8; /* Sky 400 */
+  --primary-foreground: #0f172a;
+  
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  
+  --muted: #334155; /* Slate 700 */
+  --muted-foreground: #94a3b8; /* Slate 400 */
+  
+  --accent: #818cf8; /* Indigo 400 */
+  --accent-foreground: #ffffff;
+  
+  --border: #334155; /* Slate 700 */
+  --input: #1e293b;
+  --ring: #38bdf8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: clip;
+}
+
+/* Paper Sheet Layout */
+.paper-sheet {
+  background-color: #ffffff;
+  color: #1e293b;
+  box-shadow: var(--paper-shadow);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Dark mode document tint (subtle contrast) */
+.dark .paper-sheet {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* Warning highlight markers */
+.warning-highlight {
+  position: relative;
+  border-bottom: 2px dashed #f43f5e; /* Rose 500 */
+  background-color: rgba(244, 63, 94, 0.08); /* Rose 500 at 8% opacity */
+  cursor: pointer;
+}
+
+.warning-highlight:hover {
+  background-color: rgba(244, 63, 94, 0.15);
+}
+
+/* Warning indicator pin */
+.warning-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  border-radius: 9999px;
+  width: 14px;
+  height: 14px;
+  font-size: 8px;
+  font-weight: 800;
+  margin-left: 4px;
+  vertical-align: middle;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Side scrolling panel (generic) */
+.scroll-panel {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+}
+
+/* Left panel dedicated scroll area — always visible scrollbar */
+.left-panel-scroll {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.left-panel-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel-scroll::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 9999px;
+  margin-block: 6px;
+}
+
+.left-panel-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.left-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Section ordering horizontal scroll strip */
+.section-order-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.section-order-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.section-order-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+.section-order-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.section-order-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Glassmorphism Design Token */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+.glass-card:hover {
+  border-color: rgba(2, 132, 199, 0.25);
+  box-shadow: 0 12px 40px 0 rgba(2, 132, 199, 0.06);
+  transform: translateY(-2px);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 12px 40px 0 rgba(56, 189, 248, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Marquee Scrolling Ticker Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee-container {
+  display: block;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ==========================================================================
+   Print Optimization Styles (A4 Single-Page Constraint & Layout Reset)
+   ========================================================================== */
+@media print {
+  html, body {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    height: auto !important;
+    min-height: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Set A4 standard margins and eliminate default browser header/footer spacing */
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+
+  /* Override layout containers to avoid forced page-break spacing */
+  .min-h-screen,
+  div[class*="min-h-screen"],
+  main,
+  section {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: block !important;
+  }
+
+  /* Reset the resume paper container to take full printable space and fit exactly */
+  .paper-sheet {
+    background-color: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .paper-sheet a {
+    color: #1e3a8a !important; /* Failsafe print blue */
+    text-decoration: underline !important;
+  }
+
+  /* Standardize lines/rules colors for printing */
+  .paper-sheet .border-b,
+  .paper-sheet border-zinc-200 {
+    border-color: #cbd5e1 !important; /* Crisp light gray divider lines */
+  }
+
+  /* Hide active editing warning recommendations, highlights, and icons */
+  .warning-highlight {
+    border-bottom: none !important;
+    background-color: transparent !important;
+    cursor: default !important;
+  }
+
+  .warning-pin {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+/* Screenshot/PDF Download Visual Sanitation */
+.downloading-pdf .warning-highlight {
+  border-bottom: none !important;
+  background-color: transparent !important;
+  cursor: default !important;
+}
+
+.downloading-pdf .warning-pin {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+
+

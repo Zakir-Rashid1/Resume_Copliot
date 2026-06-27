@@ -1,0 +1,114 @@
+// This is your Prisma schema file for Supabase (PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String?
+  avatar       String?  @db.Text
+  jobTitle     String?
+  location     String?
+  bio          String?  @db.Text
+  website      String?
+  github       String?
+  createdAt    DateTime @default(now())
+
+  resumes              Resume[]
+  applications         JobApplication[]
+  coverLetters         CoverLetter[]
+  linkedinOptimizations LinkedInOptimization[]
+  interviews           InterviewSession[]
+}
+
+model Resume {
+  id                  String   @id @default(cuid())
+  userId              String
+  name                String
+  rawText             String   @db.Text
+  content             Json
+  atsScore            Int      @default(0)
+  subscores           Json
+  suggestions         Json
+  roastText           String   @db.Text @default("")
+  version             Int      @default(1)
+  /// 'uploaded' = user supplied a PDF; 'built' = created in the builder
+  sourceType          String   @default("built")
+  /// Base64-encoded original PDF (only set when sourceType = 'uploaded')
+  originalPdfBase64   String?  @db.Text
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions ResumeVersion[]
+  coverLetters CoverLetter[]
+}
+
+model ResumeVersion {
+  id                String   @id @default(cuid())
+  resumeId          String
+  version           Int
+  content           Json
+  changeDescription String
+  updatedAt         DateTime @default(now())
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model JobApplication {
+  id          String   @id @default(cuid())
+  userId      String
+  company     String
+  position    String
+  dateApplied String
+  status      String
+  notes       String   @default("")
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CoverLetter {
+  id        String   @id @default(cuid())
+  userId    String
+  resumeId  String
+  company   String
+  position  String
+  tone      String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model LinkedInOptimization {
+  id                String   @id @default(cuid())
+  userId            String
+  originalHeadline  String
+  originalAbout     String   @db.Text
+  suggestedHeadline String
+  suggestedAbout    String   @db.Text
+  suggestions       Json
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InterviewSession {
+  id        String   @id @default(cuid())
+  userId    String
+  jobTitle  String
+  company   String
+  questions Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
