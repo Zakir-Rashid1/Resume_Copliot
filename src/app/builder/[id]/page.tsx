@@ -365,6 +365,12 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
   const previewRef = useRef<HTMLDivElement>(null);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [contentHeightPercent, setContentHeightPercent] = useState(0);
+
+  // Responsive View & Scaling states
+  const [activeView, setActiveView] = useState<"edit" | "preview">("edit");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [previewHeight, setPreviewHeight] = useState(1050);
   
   const [experience, setExperience] = useState<BuilderExperience[]>([
     {
@@ -747,6 +753,60 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
     sectionOrder,
   ]);
 
+  // Monitor scaling factor for preview on mobile/tablet viewports
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      const containerWidth = containerRef.current.clientWidth;
+      const targetWidth = 800;
+      const padding = 32; // standard padding on small screens (p-4 is 16px left + 16px right = 32px)
+      const availableWidth = containerWidth - padding;
+      
+      let newScale = 1;
+      if (availableWidth < targetWidth) {
+        newScale = availableWidth / targetWidth;
+      }
+      setScale(newScale);
+
+      if (previewRef.current) {
+        setPreviewHeight(previewRef.current.offsetHeight);
+      }
+    };
+
+    handleResize();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof window !== "undefined" && window.ResizeObserver && previewRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        if (previewRef.current) {
+          setPreviewHeight(previewRef.current.offsetHeight);
+        }
+      });
+      resizeObserver.observe(previewRef.current);
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [
+    activeView,
+    margins,
+    personalInfo,
+    summary,
+    skillsList,
+    experience,
+    projects,
+    education,
+    certifications,
+    achievements,
+    customSection,
+    sectionOrder
+  ]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4 bg-background text-foreground">
@@ -761,8 +821,8 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
       
       {/* Top navbar */}
       <header className="sticky top-0 z-50 w-full bg-card border-b border-border shadow-sm print:hidden">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button 
               onClick={() => router.push("/dashboard")}
               className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition"
@@ -775,17 +835,17 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
                 type="text" 
                 value={buildName}
                 onChange={(e) => setBuildName(e.target.value)}
-                className="font-bold text-sm text-foreground bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none px-1 py-0.5"
+                className="font-bold text-sm text-foreground bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none px-1 py-0.5 w-full max-w-[120px] sm:max-w-xs md:max-w-none"
               />
-              <span className="text-[10px] text-muted-foreground font-bold block uppercase tracking-wider">Document Builder</span>
+              <span className="text-[10px] text-muted-foreground font-bold hidden sm:block uppercase tracking-wider">Document Builder</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {/* Theme Toggle */}
             <button 
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-full border border-border hover:bg-muted/40 transition-colors"
+              className="p-1.5 sm:p-2 rounded-full border border-border hover:bg-muted/40 transition-colors shrink-0"
               aria-label="Toggle Theme"
             >
               {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-primary" />}
@@ -794,16 +854,19 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
             <button 
               onClick={handleSave}
               disabled={saveLoading}
-              className="bg-primary hover:bg-primary/95 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow"
+              className="bg-primary hover:bg-primary/95 text-white text-xs font-bold px-2.5 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-1.5 shadow shrink-0"
             >
-              <Save className="w-3.5 h-3.5" /> {saveLoading ? "Saving..." : "Save Resume"}
+              <Save className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{saveLoading ? "Saving..." : "Save Resume"}</span>
+              <span className="sm:hidden">{saveLoading ? "Saving..." : "Save"}</span>
             </button>
             <button 
               onClick={handleRecalculateScore}
               disabled={scanLoading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-2.5 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-1.5 shadow shrink-0"
             >
-              {scanLoading ? "Saving..." : "Calculate ATS Score"}
+              <span className="hidden sm:inline">{scanLoading ? "Saving..." : "Calculate ATS Score"}</span>
+              <span className="sm:hidden">{scanLoading ? "Saving..." : "ATS Score"}</span>
             </button>
           </div>
         </div>
@@ -812,8 +875,10 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
       {/* Split-pane workspace */}
       <div className="flex-1 flex overflow-hidden w-full relative print:block print:bg-white print:overflow-visible">
         
-        {/* LEFT PANE: Form Inputs (45% width) */}
-        <section className="w-[450px] bg-card border-r border-border flex flex-col shrink-0 h-full overflow-hidden print:hidden">
+        {/* LEFT PANE: Form Inputs */}
+        <section className={`w-full lg:w-[450px] bg-card lg:border-r border-border flex flex-col shrink-0 h-full overflow-hidden print:hidden ${
+          activeView === "edit" ? "flex" : "hidden lg:flex"
+        }`}>
           
           {/* Tabs header bar */}
           <div className="flex border-b border-border text-xs font-bold text-muted-foreground bg-muted/40 overflow-x-auto shrink-0">
@@ -1531,8 +1596,13 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
           </div>
         </section>
 
-        {/* RIGHT PANE: Live Paper Preview (55% width) */}
-        <section className="flex-1 overflow-y-auto p-8 flex flex-col items-center bg-background/50 print:bg-white print:p-0 print:overflow-visible">
+        {/* RIGHT PANE: Live Paper Preview */}
+        <section 
+          ref={containerRef}
+          className={`flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center bg-background/50 print:bg-white print:p-0 print:overflow-visible ${
+            activeView === "preview" ? "flex" : "hidden lg:flex"
+          }`}
+        >
           
           {/* Page Height Budget Indicator */}
           <div className="w-full max-w-[800px] mb-4 bg-card border border-border p-3.5 rounded-xl shadow-xs shrink-0 flex items-center justify-between gap-4 print:hidden">
@@ -1559,46 +1629,94 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
             )}
           </div>
 
-          <div
-            ref={previewRef}
-            className={`paper-sheet w-full max-w-[800px] min-h-[1050px] text-zinc-900 bg-white shadow-xl rounded-xl border border-border/60 print:shadow-none print:border-none print:p-12 overflow-hidden ${
-              margins === "narrow" ? "p-8" : margins === "wide" ? "p-16" : "p-12"
-            }`}
+          {/* Scaling wrapper */}
+          <div 
+            style={{ 
+              width: scale < 1 ? `${800 * scale}px` : '100%',
+              maxWidth: '800px',
+              height: scale < 1 ? `${previewHeight * scale}px` : 'auto',
+              position: 'relative',
+            }}
+            className="print:!w-full print:!h-auto print:!static"
           >
-            {(() => {
-              const liveResumeData = {
-                personalInfo,
-                summary,
-                skills: skillsList.map(s => s.category ? `${s.category}: ${s.items}` : s.items).filter(s => s.trim().length > 0),
-                experience: experience.map(exp => ({
-                  ...exp,
-                  description: typeof exp.description === "string" ? exp.description.split("\n").filter((b: string) => b.trim().length > 0) : exp.description
-                })),
-                projects: projects.map(proj => ({
-                  ...proj,
-                  technologies: Array.isArray(proj.technologies)
-                    ? proj.technologies
-                    : typeof proj.technologies === "string"
-                      ? proj.technologies.split(",").map((t: string) => t.trim()).filter((t: string) => t.length > 0)
-                      : []
-                })),
-                education,
-                certifications: certifications
-                  .filter(c => c.name.trim().length > 0)
-                  .map(c => c.platform.trim() ? `${c.name.trim()} | ${c.platform.trim()}` : c.name.trim()),
-                achievements: achievements.split("\n").map(a => a.trim()).filter(a => a.length > 0),
-                customSection: {
-                  title: customSection.title,
-                  content: customSection.content
-                },
-                fontFamily
-              };
-              return <ResumePreview data={liveResumeData} template={template} color={color} margins={margins} fontFamily={fontFamily} sectionOrder={sectionOrder} />;
-            })()}
+            <div
+              style={{
+                width: "800px",
+                transform: scale < 1 ? `scale(${scale})` : 'none',
+                transformOrigin: "top left",
+                position: scale < 1 ? "absolute" : "relative",
+                top: 0,
+                left: 0,
+              }}
+              className="print:!transform-none print:!static"
+            >
+              <div
+                ref={previewRef}
+                className={`paper-sheet w-[800px] min-h-[1050px] text-zinc-900 bg-white shadow-xl rounded-xl border border-border/60 print:shadow-none print:border-none print:p-12 overflow-hidden ${
+                  margins === "narrow" ? "p-8" : margins === "wide" ? "p-16" : "p-12"
+                }`}
+              >
+                {(() => {
+                  const liveResumeData = {
+                    personalInfo,
+                    summary,
+                    skills: skillsList.map(s => s.category ? `${s.category}: ${s.items}` : s.items).filter(s => s.trim().length > 0),
+                    experience: experience.map(exp => ({
+                      ...exp,
+                      description: typeof exp.description === "string" ? exp.description.split("\n").filter((b: string) => b.trim().length > 0) : exp.description
+                    })),
+                    projects: projects.map(proj => ({
+                      ...proj,
+                      technologies: Array.isArray(proj.technologies)
+                        ? proj.technologies
+                        : typeof proj.technologies === "string"
+                          ? proj.technologies.split(",").map((t: string) => t.trim()).filter((t: string) => t.length > 0)
+                          : []
+                    })),
+                    education,
+                    certifications: certifications
+                      .filter(c => c.name.trim().length > 0)
+                      .map(c => c.platform.trim() ? `${c.name.trim()} | ${c.platform.trim()}` : c.name.trim()),
+                    achievements: achievements.split("\n").map(a => a.trim()).filter(a => a.length > 0),
+                    customSection: {
+                      title: customSection.title,
+                      content: customSection.content
+                    },
+                    fontFamily
+                  };
+                  return <ResumePreview data={liveResumeData} template={template} color={color} margins={margins} fontFamily={fontFamily} sectionOrder={sectionOrder} />;
+                })()}
+              </div>
+            </div>
           </div>
         </section>
 
       </div>
+
+      {/* Floating View Toggle for Mobile/Tablet */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 lg:hidden shadow-xl rounded-full border border-border/80 bg-card/90 backdrop-blur-md p-1.5 flex items-center gap-1">
+        <button
+          onClick={() => setActiveView("edit")}
+          className={`px-5 py-2 text-xs font-bold rounded-full transition-all duration-200 active:scale-95 ${
+            activeView === "edit"
+              ? "bg-primary text-primary-foreground shadow"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => setActiveView("preview")}
+          className={`px-5 py-2 text-xs font-bold rounded-full transition-all duration-200 active:scale-95 ${
+            activeView === "preview"
+              ? "bg-primary text-primary-foreground shadow"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Preview
+        </button>
+      </div>
+
     </div>
   );
 }

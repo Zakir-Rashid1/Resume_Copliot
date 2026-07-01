@@ -45,7 +45,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL("/?error=missing_oauth_params", req.url));
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    let appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    if (appUrl.endsWith("/")) {
+      appUrl = appUrl.slice(0, -1);
+    }
     const callbackUrl = `${appUrl}/api/auth/callback`;
 
     let email = "";
