@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import BottomNavbar from "@/components/BottomNavbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col w-full max-w-full overflow-x-clip">{children}</body>
+      <body className="min-h-full flex flex-col w-full max-w-full overflow-x-clip pb-16 lg:pb-0 print:!pb-0">
+        {children}
+        <BottomNavbar />
+      </body>
     </html>
   );
 }
