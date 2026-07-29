@@ -252,6 +252,7 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
   const [loading, setLoading] = useState(true);
   const [saveLoading, setSaveLoading] = useState(false);
   const [scanLoading, setScanLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("theme");
