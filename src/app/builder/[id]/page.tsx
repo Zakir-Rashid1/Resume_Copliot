@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Plus, Trash2, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Sun, Moon, Download } from "lucide-react";
 import confetti from "canvas-confetti";
 import ResumePreview from "@/components/ResumePreview";
 
@@ -718,6 +718,43 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
     }
   };
 
+  const handleDownloadPdf = async () => {
+    setDownloadLoading(true);
+    try {
+      if (id !== "new") {
+        const res = await fetch(`/api/resumes/${id}/pdf`);
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${buildName.replace(/[^a-zA-Z0-9\s-]/g, "").trim() || "resume"}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          confetti({ particleCount: 50, spread: 45 });
+          return;
+        }
+      }
+      // Fallback: open dedicated print page or trigger browser print
+      if (id !== "new") {
+        window.open(`/print/${id}`, "_blank");
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error(err);
+      if (id !== "new") {
+        window.open(`/print/${id}`, "_blank");
+      } else {
+        window.print();
+      }
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
 
   // Monitor height budget of preview canvas
   useEffect(() => {
@@ -859,6 +896,15 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
               <Save className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{saveLoading ? "Saving..." : "Save Resume"}</span>
               <span className="sm:hidden">{saveLoading ? "Saving..." : "Save"}</span>
+            </button>
+            <button 
+              onClick={handleDownloadPdf}
+              disabled={downloadLoading}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-2.5 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-1.5 shadow shrink-0"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{downloadLoading ? "Preparing..." : "Download PDF"}</span>
+              <span className="sm:hidden">{downloadLoading ? "..." : "PDF"}</span>
             </button>
             <button 
               onClick={handleRecalculateScore}

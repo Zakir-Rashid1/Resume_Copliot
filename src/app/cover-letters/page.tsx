@@ -181,7 +181,10 @@ export default function CoverLettersSuite() {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to export PDF");
+      if (!res.ok) {
+        window.print();
+        return;
+      }
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -194,7 +197,7 @@ export default function CoverLettersSuite() {
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      alert("Failed to export PDF. Please try again.");
+      window.print();
     } finally {
       setPdfLoading(false);
     }

@@ -389,7 +389,11 @@ export default function ResumeChecker({ params }: { params: Promise<{ id: string
       setTimeout(() => setDownloadStatus("Polishing layout margins..."), 1500);
 
       const res = await fetch(`/api/resumes/${resume.id}/pdf`);
-      if (!res.ok) throw new Error("Export failed");
+      if (!res.ok) {
+        // Fallback to print preview page if server PDF compiler is unavailable
+        window.open(`/print/${resume.id}`, "_blank");
+        return;
+      }
       
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -405,7 +409,7 @@ export default function ResumeChecker({ params }: { params: Promise<{ id: string
       confetti({ particleCount: 50, spread: 45 });
     } catch (err) {
       console.error(err);
-      alert("Failed to export PDF. Please check your network and try again.");
+      window.open(`/print/${resume.id}`, "_blank");
     } finally {
       setDownloadLoading(false);
       setDownloadStatus("");
