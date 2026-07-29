@@ -27,7 +27,7 @@ function esc(str: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function buildResumeHtml(content: ResumeContent, resumeName: string): string {
+export function buildResumeHtml(content: ResumeContent, resumeName: string): string {
   const pi = content.personalInfo;
 
   // Build contact line

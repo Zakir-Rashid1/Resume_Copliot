@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import { db } from "@/lib/db";
+import { db, ResumeContent } from "@/lib/db";
+import { buildResumeHtml } from "@/app/api/resumes/[id]/export/route";
 
 const JWT_SECRET = process.env.JWT_SECRET || "platform-development-jwt-secret-key-10293";
 
@@ -46,10 +47,6 @@ export async function GET(
       );
     }
 
-    // Determine the base URL from the request
-    const origin = `${req.nextUrl.protocol}//${req.nextUrl.host}`;
-    const printUrl = `${origin}/print/${id}`;
-
     const browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -60,35 +57,14 @@ export async function GET(
     });
 
     const page = await browser.newPage();
-
-    // A4 at 96dpi = 794 × 1123 px. Using a wider viewport ensures nothing overflows.
     await page.setViewport({ width: 1240, height: 1754, deviceScaleFactor: 2 });
-
-    // Activate @media print so the toolbar hides and print-specific CSS applies
     await page.emulateMediaType("print");
 
-    // Pass the auth cookie so the print page can fetch resume data
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    if (token) {
-      await page.setCookie({
-        name: "token",
-        value: token,
-        domain: req.nextUrl.hostname,
-        path: "/",
-      });
-    }
+    // Generate HTML directly to prevent localhost server deadlocks
+    const htmlContent = buildResumeHtml(resume.content as unknown as ResumeContent, resume.name);
+    await page.setContent(htmlContent, { waitUntil: "load" });
 
-    // Load the print page and wait until network is idle (fonts + data loaded)
-    await page.goto(printUrl, { waitUntil: "networkidle0", timeout: 30000 });
-
-    // Wait for the paper-sheet element so we know React has finished rendering
-    await page.waitForSelector(".paper-sheet", { timeout: 10000 });
-
-    // Extra tick to let any layout reflows settle
-    await new Promise((r) => setTimeout(r, 500));
-
-    // Generate A4 PDF — preferCSSPageSize respects our @page { size: A4 } rule
+    // Generate A4 PDF
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
