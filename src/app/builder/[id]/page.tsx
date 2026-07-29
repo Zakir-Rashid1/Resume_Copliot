@@ -737,21 +737,16 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
           return;
         }
       }
-      // Fallback: open dedicated print page or trigger browser print
-      if (id !== "new") {
-        window.open(`/print/${id}`, "_blank");
-      } else {
-        window.print();
-      }
     } catch (err) {
       console.error(err);
-      if (id !== "new") {
-        window.open(`/print/${id}`, "_blank");
-      } else {
-        window.print();
-      }
     } finally {
       setDownloadLoading(false);
+    }
+
+    if (id !== "new") {
+      window.location.href = `/print/${id}`;
+    } else {
+      window.print();
     }
   };
 

@@ -381,6 +381,11 @@ export default function ResumeChecker({ params }: { params: Promise<{ id: string
   const handleDownload = async () => {
     if (!resume) return;
 
+    if (resume.id === "mock-id") {
+      window.print();
+      return;
+    }
+
     setDownloadLoading(true);
     setDownloadStatus("Connecting to compiler...");
     
@@ -389,31 +394,30 @@ export default function ResumeChecker({ params }: { params: Promise<{ id: string
       setTimeout(() => setDownloadStatus("Polishing layout margins..."), 1500);
 
       const res = await fetch(`/api/resumes/${resume.id}/pdf`);
-      if (!res.ok) {
-        // Fallback to print preview page if server PDF compiler is unavailable
-        window.open(`/print/${resume.id}`, "_blank");
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const filename = `${resume.name.replace(/[^a-zA-Z0-9\s-]/g, "").trim() || "resume"}.pdf`;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        setDownloadStatus("Success!");
+        confetti({ particleCount: 50, spread: 45 });
         return;
       }
-      
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const filename = `${resume.name.replace(/[^a-zA-Z0-9\s-]/g, "").trim() || "resume"}.pdf`;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      setDownloadStatus("Success!");
-      confetti({ particleCount: 50, spread: 45 });
     } catch (err) {
       console.error(err);
-      window.open(`/print/${resume.id}`, "_blank");
     } finally {
       setDownloadLoading(false);
       setDownloadStatus("");
     }
+
+    // Direct fallback to print route (prevents browser popup blocker issues)
+    window.location.href = `/print/${resume.id}`;
   };
 
   if (loading) {
