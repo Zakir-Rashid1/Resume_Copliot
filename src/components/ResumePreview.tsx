@@ -607,9 +607,11 @@ export default function ResumePreview({
                                 </a>
                               )}
                             </span>
-                            <span className="text-slate-600 font-semibold text-[10px]">
-                              {proj.period || "2019 - 2020"}
-                            </span>
+                            {proj.period && (
+                              <span className="text-slate-600 font-semibold text-[10px]">
+                                {proj.period}
+                              </span>
+                            )}
                           </div>
                           <ul className="list-disc pl-4 space-y-1 text-slate-700 text-[10px] mt-1">
                             {bullets.map((bullet: string, bIdx: number) => (
