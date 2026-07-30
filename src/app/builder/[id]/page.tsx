@@ -373,35 +373,11 @@ export default function ResumeBuilder({ params }: { params: Promise<{ id: string
   const [scale, setScale] = useState(1);
   const [previewHeight, setPreviewHeight] = useState(1050);
   
-  const [experience, setExperience] = useState<BuilderExperience[]>([
-    {
-      company: "Apex Tech Corp",
-      position: "Frontend Engineer",
-      startDate: "Jan 2024",
-      endDate: "Present",
-      location: "Chicago, IL",
-      description: "Implemented reactive web modules for target e-commerce layouts.\nCollaborated on query structures with database managers."
-    }
-  ]);
+  const [experience, setExperience] = useState<BuilderExperience[]>([]);
   
-  const [projects, setProjects] = useState<BuilderProject[]>([
-    {
-      name: "Portfolio Site",
-      description: "Deploys static templates compiled from candidate parameters.",
-      technologies: "Next.js, TypeScript"
-    }
-  ]);
+  const [projects, setProjects] = useState<BuilderProject[]>([]);
   
-  const [education, setEducation] = useState<BuilderEducation[]>([
-    {
-      institution: "Midwest University",
-      degree: "BS",
-      fieldOfStudy: "Informatics",
-      startDate: "2020",
-      endDate: "2024",
-      gpa: "3.7"
-    }
-  ]);
+  const [education, setEducation] = useState<BuilderEducation[]>([]);
 
   // Load existing resume if editing
   useEffect(() => {

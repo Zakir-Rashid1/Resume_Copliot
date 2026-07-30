@@ -164,9 +164,9 @@ export function segmentResumeText(text: string) {
         currentExperience = {
           company: line.split(/[-–|]/)[0]?.trim() || "Company",
           position: "Software Engineer",
-          startDate: "Jan 2020",
-          endDate: "Present",
-          location: "Remote",
+          startDate: "",
+          endDate: "",
+          location: "",
           description: []
         };
       } else {
@@ -207,8 +207,8 @@ export function segmentResumeText(text: string) {
           institution: lineLower.includes("university") || lineLower.includes("college") || lineLower.includes("institute") ? line : "University",
           degree: lineLower.includes("bachelor") ? "Bachelor of Science" : lineLower.includes("master") ? "Master of Science" : "Degree",
           fieldOfStudy: lineLower.includes("computer") ? "Computer Science" : "Engineering",
-          startDate: "2018",
-          endDate: "2022",
+          startDate: "",
+          endDate: "",
         });
       }
     }
@@ -231,29 +231,10 @@ export function segmentResumeText(text: string) {
     sections.skills = ["JavaScript", "TypeScript", "React", "Node.js", "Python", "SQL", "Git", "HTML", "CSS"];
   }
   if (sections.education.length === 0) {
-    sections.education = [{
-      institution: "State University",
-      degree: "Bachelor of Science",
-      fieldOfStudy: "Computer Science",
-      startDate: "2018",
-      endDate: "2022",
-      gpa: "3.7"
-    }];
+    sections.education = [];
   }
   if (sections.experience.length === 0) {
-    sections.experience = [{
-      company: "InnovateTech Systems",
-      position: "Full Stack Engineer",
-      startDate: "June 2022",
-      endDate: "Present",
-      location: "San Francisco, CA (Remote)",
-      description: [
-        "Worked on developing clean responsive user interfaces for SaaS dashboards.",
-        "Maintained databases and wrote API endpoints for backend communications.",
-        "Collaborated with product design teams to enhance user experience.",
-        "Refactored legacy code to improve performance and code readability."
-      ]
-    }];
+    sections.experience = [];
   }
 
   return sections;
