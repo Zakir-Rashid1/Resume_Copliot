@@ -544,9 +544,7 @@ export default function Home() {
               >
                 <div className="flex justify-between items-center font-bold text-slate-900 text-[8px]">
                   <span>{resumeMockData.projects[0].name}</span>
-                  <span className="text-slate-500 font-medium text-[7.5px]">
-                    2019 - 2020
-                  </span>
+
                 </div>
                 <ul className="list-disc pl-4 space-y-1 text-slate-600 leading-relaxed text-[8px] mt-1">
                   <li>
